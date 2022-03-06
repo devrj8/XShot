@@ -31,6 +31,7 @@ import javax.swing.event.DocumentListener;
 import com.elsea.stone.property.PropertyPool;
 import com.elsealabs.xshot.capture.Capture;
 import com.elsealabs.xshot.capture.ClipboardCapture;
+import com.elsealabs.xshot.file.FileSystem;
 import com.elsealabs.xshot.file.SaveLocation;
 import com.elsealabs.xshot.program.Program;
 
@@ -78,6 +79,9 @@ public class ViewSave extends JFrame {
 		positiveFileAlerts.add("Coolio!");
 		positiveFileAlerts.add("Ready to savaroo!");
 		positiveFileAlerts.add("Wahoo!");
+
+		// defaultFilePath to save
+		defaultFilePath = program.getFileSystem().getPath(FileSystem.PATH.SAVE_DEFAULT_DIR);
 		
 		generateExtensions();
 		addListeners();
