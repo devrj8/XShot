@@ -6,10 +6,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 import java.io.File;
 
 import javax.swing.JButton;
@@ -180,6 +177,7 @@ public class ViewPicture extends JFrame
 		JButton buttonQuit = new JButton("Quit, no save");
 		buttonQuit.addActionListener(actionQuit);
 		bar.add(buttonQuit);
+
 
 		// Container for easier manipulation of the scroll pane.
 		container = new JPanel();

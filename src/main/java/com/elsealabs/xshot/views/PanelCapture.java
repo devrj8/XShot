@@ -1,15 +1,13 @@
 package com.elsealabs.xshot.views;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -65,6 +63,15 @@ public class PanelCapture extends JPanel
 
     private AREA hoverArea;
 
+	private DrawLShapeLineMouseListener drawLShapeLineMouseListener;
+
+	//remove this variable
+	private int mouseReleasedX;
+	private int mouseReleasedY;
+
+
+	private List<LShapeLine> lShapeLineList;
+
 	/**
 	 * Creates a new PanelCapture
 	 *
@@ -95,7 +102,9 @@ public class PanelCapture extends JPanel
 
 		frameSize = new Dimension(0, 0);
 
-		_addListeners();
+		//_addListeners();
+		addDrawLineMouseListener();
+		addSomeLines();
 	}
 
 	/**
@@ -113,6 +122,10 @@ public class PanelCapture extends JPanel
 			public void mouseReleased(MouseEvent e)
 			{
 				pressListening = false;
+				mouseReleasedX = e.getX();
+				mouseReleasedY = e.getY();
+
+
 				super.mouseReleased(e);
 			}
 
@@ -213,7 +226,45 @@ public class PanelCapture extends JPanel
 				super.mouseMoved(e);
 			}
 		});
+
+
 	}
+
+	private void addDrawLineMouseListener(){
+		lShapeLineList = new ArrayList<LShapeLine>();
+		drawLShapeLineMouseListener = new DrawLShapeLineMouseListener();
+		addMouseListener(drawLShapeLineMouseListener);
+		addMouseMotionListener(drawLShapeLineMouseListener);
+	}
+
+	/**
+	 * TODO : remove it on production
+	 */
+	private void addSomeLines() {
+		LShapeLine line1 = new LShapeLine();
+		line1.setStartPoint(new Point(734, 291));
+		line1.setEndPoint(new Point(755, 291));
+		line1.setFirstLine(new Line2D.Double(734.0, 291.0, 755.0, 291.0));
+		line1.setSecondLine(new Line2D.Double(755.0, 291.0, 755.0, 291.0));
+		line1.setFirstLineFlow(LineFlow.HORIZONTAL);
+		line1.setFirstLineDirection(LineDirection.LEFT_TO_RIGHT);
+
+		lShapeLineList.add(line1);
+
+		LShapeLine line2 = new LShapeLine();
+		line2.setStartPoint(new Point(234, 700));
+		line2.setEndPoint(new Point(555, 700));
+		line2.setFirstLine(new Line2D.Double(734.0, 291.0, 755.0, 291.0));
+		line2.setSecondLine(new Line2D.Double(755.0, 291.0, 755.0, 291.0));
+		line2.setFirstLineFlow(LineFlow.HORIZONTAL);
+		line2.setFirstLineDirection(LineDirection.LEFT_TO_RIGHT);
+
+		lShapeLineList.add(line2);
+
+	}
+
+
+
 
 	/**
 	 * Paints the components and handles when information regarding
@@ -265,32 +316,46 @@ public class PanelCapture extends JPanel
         	null
         );
 
+		Graphics imgGraphics = capture.getUpdatedImage().createGraphics();
+
 		// Draw the image's visual hints
 
-		if (hoverArea == null)
-		{
-			g.setColor(Color.LIGHT_GRAY);
-			g.draw(boundsUpdatedScaled);
-		}
-		else
-		{
-			g.setColor(Color.black);
-			g.draw(boundsUpdatedScaled);;
+//		if (hoverArea == null)
+//		{
+//			g.setColor(Color.LIGHT_GRAY);
+//			g.draw(boundsUpdatedScaled);
+//		}
+//		else
+//		{
+//			g.setColor(Color.black);
+//			g.draw(boundsUpdatedScaled);;
+//		}
+//
+//		if (debug)
+//		{
+//			g.setColor(Color.RED);
+//			g.draw(boundsUpdatedScaled);
+//
+//			g.setColor(Color.BLUE);
+//			g.draw(imageEast);
+//			g.draw(imageWest);
+//
+//			g.setColor(Color.GREEN);
+//			g.draw(imageNorth);
+//			g.draw(imageSouth);
+//		}
+
+		if(lShapeLineList.size() > 1) {
+			for (LShapeLine lShapeLine : lShapeLineList) {
+				lShapeLine.draw(g);
+				System.out.println(lShapeLine);
+			}
 		}
 
-		if (debug)
-		{
-			g.setColor(Color.RED);
-			g.draw(boundsUpdatedScaled);
-
-			g.setColor(Color.BLUE);
-			g.draw(imageEast);
-			g.draw(imageWest);
-
-			g.setColor(Color.GREEN);
-			g.draw(imageNorth);
-			g.draw(imageSouth);
+		for(Component component : getComponents()){
+//			component.repaint();
 		}
+//		drawLShapeLineMouseListener.drawLine(g);
 	}
 
 	/**
@@ -399,4 +464,11 @@ public class PanelCapture extends JPanel
     	return saved;
     }
 
+	public List<LShapeLine> getlShapeLineList() {
+		return lShapeLineList;
+	}
+
+	public void setlShapeLineList(List<LShapeLine> lShapeLineList) {
+		this.lShapeLineList = lShapeLineList;
+	}
 }

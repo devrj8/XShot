@@ -1,13 +1,6 @@
 package com.elsealabs.xshot.views;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
@@ -170,7 +163,14 @@ public class ViewMainModern extends JFrame
 				container.getColor("light"),
 				container.getColor("light").brighter(),
 				a -> {
+					setState(Frame.ICONIFIED);
+					CaptureDevice device = new CaptureDevice();
+					BufferedImage image  = device.captureAll();
 
+					Rectangle total  = new Rectangle(0, 0, image.getWidth(), image.getHeight());
+					Capture capture  = new Capture(image, total, total);
+					ViewPicture view = new ViewPicture(capture);
+					view.build();
 				});
 		buttonPanel.add(button_timed);
 
