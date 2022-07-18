@@ -59,7 +59,7 @@ public class ViewMainModern extends JFrame
 
 			if (Program.getInstance().getBuildType() == Program.BUILD_TYPE.JAR)
 			{
-				InputStream is = getClass().getResourceAsStream("/resources/font.ttf");
+				InputStream is = getClass().getResourceAsStream("/resources/Lato-Regular.ttf");
 				font = Font.createFont(Font.TRUETYPE_FONT, is);
 			}
 			else if (Program.getInstance().getBuildType() == Program.BUILD_TYPE.IDE)
@@ -69,7 +69,7 @@ public class ViewMainModern extends JFrame
 			}
 
 			font = font.deriveFont(18f);
-			fontLarge = font.deriveFont(40f);
+			fontLarge = font.deriveFont(20f);
 		}
 		catch (FontFormatException | IOException e)
 		{
@@ -83,8 +83,9 @@ public class ViewMainModern extends JFrame
 		addListeners();
 
 		setUndecorated(true);
-		setSize(600, 230);
+		setSize(300, 60);
 		setLocationRelativeTo(null);
+		setLocation((int) getLocation().getX(), 100);
 
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -98,7 +99,7 @@ public class ViewMainModern extends JFrame
 		titlePanel.setLayout(new GridLayout(0, 5, 0, 10));
 		titlePanel.setBackground(container.getColor("dark"));
 		titlePanel.setPreferredSize(new Dimension(titlePanel.getPreferredSize().width, 60));
-		mainPanel.add(titlePanel, BorderLayout.NORTH);
+		//mainPanel.add(titlePanel, BorderLayout.NORTH);
 
 		ModernLabel labelTitle = new ModernLabel("xshot", container.getColor("light"), fontLarge);
 		titlePanel.add(labelTitle);

@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DrawLShapeLineMouseListener implements MouseListener, MouseMotionListener {
 
@@ -13,16 +15,21 @@ public class DrawLShapeLineMouseListener implements MouseListener, MouseMotionLi
     private Point mouseReleasedPoint;
     private LShapeLine lShapeLine;
 
+    ArrowCommentPanel arrowCommentPanel;
+
+    public DrawLShapeLineMouseListener(ArrowCommentPanel arrowCommentPanel){
+        this.arrowCommentPanel = arrowCommentPanel;
+    }
 
     @Override
     public void mousePressed(MouseEvent e) {
 
         mousePressedPoint = e.getPoint();
-        lShapeLine = new LShapeLine(mousePressedPoint);
+        lShapeLine = new LShapeLine(mousePressedPoint, (JPanel) e.getSource());
 
         // Add line to Parent component line list, so it will remember all lines and will draw them  when paint method called every time.
-        if(e.getSource() instanceof PanelCapture)
-            ((PanelCapture) e.getSource()).getlShapeLineList().add(lShapeLine);
+        if(e.getSource() instanceof ArrowCommentPanel)
+            ((ArrowCommentPanel) e.getSource()).getlShapeLineList().add(lShapeLine);
     }
 
     @Override
@@ -39,47 +46,29 @@ public class DrawLShapeLineMouseListener implements MouseListener, MouseMotionLi
 
         mouseReleasedPoint = e.getPoint();
         lShapeLine.setEndPoint(mouseReleasedPoint);
+        arrowCommentPanel.getLayerPaintListener().layerPainted(Arrays.asList(lShapeLine));
+        arrowCommentPanel.clearGraphics();
+        //lShapeLine.setDrawingFinished(true);
+        lShapeLine.showCommentDialog((JFrame)(((ArrowCommentPanel) e.getSource()).getParent()).getParent().getParent().getParent().getParent().getParent(), (JPanel) e.getSource());
+        //addTextArea((PanelCapture) e.getSource());
 
-        addTextArea((PanelCapture) e.getSource());
         e.getComponent().repaint();
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-
-    }
-
-    private void addTextArea(PanelCapture panelCapture){
-
-        // Add text area at the second line end
-        if(lShapeLine.getSecondLineFlow() == LineFlow.HORIZONTAL && lShapeLine.getSecondLineDirection() == LineDirection.LEFT_TO_RIGHT) {
-            JTextArea textArea = new JTextArea("Hello World!");
-            textArea.setSize(200, 100);
-            textArea.setOpaque(false);
-            textArea.setBorder(BorderFactory.createLineBorder(Color.red));
-            textArea.setBounds((int) lShapeLine.getSecondLine().getP2().getX(), (int) lShapeLine.getSecondLine().getP2().getY(), 200, 100);
-            System.out.println("Text box at"+(int) lShapeLine.getSecondLine().getP2().getX()+" , "+ (int) lShapeLine.getSecondLine().getP2().getY());
-            panelCapture.setLayout(null);
-            panelCapture.add(textArea);
-            panelCapture.repaint();
-        }
-
-
     }
 
 }

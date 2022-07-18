@@ -1,30 +1,28 @@
 package com.elsealabs.xshot.views;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JViewport;
+import javax.imageio.ImageIO;
+import javax.swing.*;
 
 import com.elsealabs.xshot.capture.Capture;
 import com.elsealabs.xshot.capture.Capture.AREA;
 import com.elsealabs.xshot.math.Scale;
 
-public class PanelCapture extends JPanel
+
+public class PanelCapture extends JLayeredPane
 {
 	// Referenced outside objects
 
 	private JComponent  parent;
-	private JFrame      frame;
+	public JFrame      frame;
 	private Capture     capture;
 	private JScrollPane scrollPane;
 
@@ -63,14 +61,9 @@ public class PanelCapture extends JPanel
 
     private AREA hoverArea;
 
-	private DrawLShapeLineMouseListener drawLShapeLineMouseListener;
+	private JPanel container;
 
-	//remove this variable
-	private int mouseReleasedX;
-	private int mouseReleasedY;
-
-
-	private List<LShapeLine> lShapeLineList;
+	private Screenshot screenshot;
 
 	/**
 	 * Creates a new PanelCapture
@@ -79,7 +72,7 @@ public class PanelCapture extends JPanel
 	 * @param frame   The frame the parent and the panel are inside of
 	 * @param capture The capture to display in the panel
 	 */
-	public PanelCapture(JComponent parent, JFrame frame, Capture capture)
+	public PanelCapture(JComponent parent, JFrame frame, Capture capture, JPanel container)
 	{
 		this.parent  = parent;
 		this.frame   = frame;
@@ -102,167 +95,13 @@ public class PanelCapture extends JPanel
 
 		frameSize = new Dimension(0, 0);
 
+		this.container = container;
 		//_addListeners();
-		addDrawLineMouseListener();
-		addSomeLines();
-	}
-
-	/**
-	 * Adds relevant listeners required f  or the panel capture to
-	 * function correctly.
-	 */
-	private void _addListeners()
-	{
-		/**
-		 * Mouse Listener to track initial point that starts the drag
-		 */
-		addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mouseReleased(MouseEvent e)
-			{
-				pressListening = false;
-				mouseReleasedX = e.getX();
-				mouseReleasedY = e.getY();
 
 
-				super.mouseReleased(e);
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e)
-			{
-				if ((currentArea = locateArea(e.getPoint())) != null)
-				{
-					pressListening = true;
-					
-					// Scale mouse clicks
-					
-					Point original = e.getPoint();
-					Point scaled = new Point(scale.scale(original.x) , scale.scale(original.y));
-					
-					initial = scaled;
-				}
-				super.mousePressed(e);
-			}
-		});
-
-		/**
-		 * Mouse Motion Listener to track dragging
-		 */
-		addMouseMotionListener(new MouseMotionAdapter()
-		{
-
-			/**
-			 * Fires the events to cause dragging the image to be recognized.
-			 */
-			@Override
-			public void mouseDragged(MouseEvent e)
-			{
-				Point scaled = scale.scalePoint(e.getPoint());
-				
-				if (currentArea != null && pressListening)
-				{
-					// Update currentAreas based on whether or not they are being updated
-					// on the y-axis or the x-axis;
-
-					switch (currentArea)
-					{
-						case NORTH:
-						case SOUTH:
-							capture.addTo(currentArea, initial.y - scaled.y);
-							break;
-
-						case EAST:
-						case WEST:
-							capture.addTo(currentArea, initial.x - scaled.x);
-							break;
-
-						case NORTHWEST:
-							capture.addTo(Capture.AREA.NORTH, initial.y - scaled.y);
-							capture.addTo(Capture.AREA.WEST , initial.x - scaled.x);
-							break;
-
-						case NORTHEAST:
-							capture.addTo(Capture.AREA.NORTH, initial.y - scaled.y);
-							capture.addTo(Capture.AREA.EAST , initial.x - scaled.x);
-							break;
-
-						case SOUTHWEST:
-							capture.addTo(Capture.AREA.SOUTH, initial.y - scaled.y);
-							capture.addTo(Capture.AREA.WEST , initial.x - scaled.x);
-							break;
-
-						case SOUTHEAST:
-							capture.addTo(Capture.AREA.SOUTH, initial.y - scaled.y);
-							capture.addTo(Capture.AREA.EAST , initial.x - scaled.x);
-							break;
-
-						default:
-							break;
-					}
-
-					initial = scaled;
-
-					updateCollisionBounds();
-					repaint();
-				}
-
-				super.mouseDragged(e);
-			}
-
-			/**
-			 * Updates the image visuals based on the position of the mouse.
-			 */
-			@Override
-			public void mouseMoved(MouseEvent e)
-			{
-				Point scaled = scale.scalePoint(e.getPoint());
-			
-				if (imageWhole.contains(scaled)) hoverArea = locateArea(scaled);
-				else hoverArea = null;
-
-				repaint();
-				super.mouseMoved(e);
-			}
-		});
-
+//		addSomeLines();
 
 	}
-
-	private void addDrawLineMouseListener(){
-		lShapeLineList = new ArrayList<LShapeLine>();
-		drawLShapeLineMouseListener = new DrawLShapeLineMouseListener();
-		addMouseListener(drawLShapeLineMouseListener);
-		addMouseMotionListener(drawLShapeLineMouseListener);
-	}
-
-	/**
-	 * TODO : remove it on production
-	 */
-	private void addSomeLines() {
-		LShapeLine line1 = new LShapeLine();
-		line1.setStartPoint(new Point(734, 291));
-		line1.setEndPoint(new Point(755, 291));
-		line1.setFirstLine(new Line2D.Double(734.0, 291.0, 755.0, 291.0));
-		line1.setSecondLine(new Line2D.Double(755.0, 291.0, 755.0, 291.0));
-		line1.setFirstLineFlow(LineFlow.HORIZONTAL);
-		line1.setFirstLineDirection(LineDirection.LEFT_TO_RIGHT);
-
-		lShapeLineList.add(line1);
-
-		LShapeLine line2 = new LShapeLine();
-		line2.setStartPoint(new Point(234, 700));
-		line2.setEndPoint(new Point(555, 700));
-		line2.setFirstLine(new Line2D.Double(734.0, 291.0, 755.0, 291.0));
-		line2.setSecondLine(new Line2D.Double(755.0, 291.0, 755.0, 291.0));
-		line2.setFirstLineFlow(LineFlow.HORIZONTAL);
-		line2.setFirstLineDirection(LineDirection.LEFT_TO_RIGHT);
-
-		lShapeLineList.add(line2);
-
-	}
-
 
 
 
@@ -270,16 +109,14 @@ public class PanelCapture extends JPanel
 	 * Paints the components and handles when information regarding
 	 * positioning should be updated
 	 */
-	public void paint(Graphics gd)
+	public void paintx()
 	{
-		Graphics2D g = (Graphics2D) gd;
-		g.clearRect(0, 0, width, height);
 		
 		/**
 		 * Scale all used bounds
 		 */
 		
-		Rectangle boundsUpdatedScaled = scale.scaleRectangle(capture.getUpdatedBounds());
+		Rectangle boundsUpdatedScaled = capture.getUpdatedBounds();
 		
 		//System.out.println("SCALED BOUNDS: " + boundsUpdatedScaled);
 
@@ -287,76 +124,70 @@ public class PanelCapture extends JPanel
 		 * This ensures that the viewport will only be repositioned when the user
 		 * is re-sizing the frame.
 		 */
-        if (
-                frameSize.getWidth()  != frame.getSize().getWidth() ||
-                frameSize.getHeight() != frame.getSize().getHeight()
-        )
-		{
-			repositionViewport();
-			updateCollisionBounds();
 
-			frameSize = frame.getSize();
-		}
 
-        // Draw the capture's image with it's most recently updated bounds
-        
-        BufferedImage scaled = new BufferedImage(
-        		boundsUpdatedScaled.width, 
-        		boundsUpdatedScaled.height,
-        		BufferedImage.TYPE_INT_ARGB
-        );
-        Graphics gscaled = scaled.createGraphics();
-        
-        g.drawImage(
-        	capture.getUpdatedImage(),
-        	boundsUpdatedScaled.x,
-        	boundsUpdatedScaled.y,
-        	boundsUpdatedScaled.width,
-        	boundsUpdatedScaled.height,
-        	null
-        );
+//        g.drawImage(
+//        	capture.getUpdatedImage(),
+//        	boundsUpdatedScaled.x,
+//        	boundsUpdatedScaled.y,
+//        	boundsUpdatedScaled.width,
+//        	boundsUpdatedScaled.height,
+//        	null
+//        );
+
+		//PanelCapture size calculation
+
+		// margins or padding around the image
+		int margins = 25 * 2;
+		int availableWidth = (int) getParent().getWidth() - margins;
+		int availableHeight = (int)getParent().getHeight() - margins;
+
+		float scalingRatio = 1f;
+	 	float scalingWidthRatio = (float) availableWidth / capture.getUpdatedBounds().width;
+		float scalingHeightRatio = (float) availableHeight /capture.getUpdatedBounds().height;
+
+		scalingRatio = scalingWidthRatio < scalingHeightRatio ? scalingWidthRatio : scalingHeightRatio;
+
+		// Set size the same as the size of the full original image
+		Dimension panelCaptureSize = new Dimension(
+				(int) (capture.getUpdatedBounds().width * scalingRatio),
+				(int) (capture.getUpdatedBounds().height * scalingRatio)
+		);
+
+		setSize(panelCaptureSize);
+		setPreferredSize(panelCaptureSize);
+		setLocation(
+				(getParent().getWidth() - panelCaptureSize.width) / 2,
+				(getParent().getHeight() - panelCaptureSize.height) / 2
+		);
+
+		screenshot = new Screenshot(capture.getUpdatedImage(),
+				boundsUpdatedScaled.x,
+				boundsUpdatedScaled.y,
+				getWidth(),
+				getHeight());
+
+		add(screenshot, new Integer(100));
+		add(new Highlighter(), new Integer(101));
 
 		Graphics imgGraphics = capture.getUpdatedImage().createGraphics();
 
-		// Draw the image's visual hints
+		//addSomeDummyLines(imgGraphics);
 
-//		if (hoverArea == null)
-//		{
-//			g.setColor(Color.LIGHT_GRAY);
-//			g.draw(boundsUpdatedScaled);
-//		}
-//		else
-//		{
-//			g.setColor(Color.black);
-//			g.draw(boundsUpdatedScaled);;
-//		}
-//
-//		if (debug)
-//		{
-//			g.setColor(Color.RED);
-//			g.draw(boundsUpdatedScaled);
-//
-//			g.setColor(Color.BLUE);
-//			g.draw(imageEast);
-//			g.draw(imageWest);
-//
-//			g.setColor(Color.GREEN);
-//			g.draw(imageNorth);
-//			g.draw(imageSouth);
-//		}
 
-		if(lShapeLineList.size() > 1) {
-			for (LShapeLine lShapeLine : lShapeLineList) {
-				lShapeLine.draw(g);
-				System.out.println(lShapeLine);
-			}
+
+		if (
+				frameSize.getWidth()  != frame.getSize().getWidth() ||
+						frameSize.getHeight() != frame.getSize().getHeight()
+		)
+		{
+			//repositionViewport();
+			//updateCollisionBounds();
+
+			frameSize = frame.getSize();
 		}
-
-		for(Component component : getComponents()){
-//			component.repaint();
-		}
-//		drawLShapeLineMouseListener.drawLine(g);
 	}
+
 
 	/**
 	 * This takes the width of the viewport and the width of the image
@@ -464,11 +295,73 @@ public class PanelCapture extends JPanel
     	return saved;
     }
 
-	public List<LShapeLine> getlShapeLineList() {
-		return lShapeLineList;
+	public void addArrowCommentPanel(){
+
+		ArrowCommentPanel arrowCommentPanel = new ArrowCommentPanel(getWidth(), getHeight());
+		arrowCommentPanel.addLayerPaintListener(screenshot);
+		//TODO : Integer should not be static - work on it
+		add(arrowCommentPanel, new Integer(105));
+
 	}
 
-	public void setlShapeLineList(List<LShapeLine> lShapeLineList) {
-		this.lShapeLineList = lShapeLineList;
+
+
+}
+
+class Screenshot extends JPanel implements LayerPaintListener {
+
+	private Stack<BufferedImage> previousImageStack;
+	private BufferedImage image;
+
+	public Screenshot(BufferedImage bufferedImage, int x, int y, int width, int height){
+		setBounds(x, y, width, height);
+		image = bufferedImage;
+		previousImageStack = new Stack<BufferedImage>();
+		previousImageStack.add(image);
+	}
+
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Graphics2D g2 = (Graphics2D)g;
+		RenderingHints rh = new RenderingHints(
+				RenderingHints.KEY_INTERPOLATION,
+				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g2.setRenderingHints(rh);
+		g2.drawImage(image,0,0, getWidth(), getHeight(), this );
+		g2.dispose();
+	}
+
+	@Override
+	public void layerPainted(List<Object> paintList) {
+		Graphics g = image.createGraphics();
+
+		for(Object obj : paintList){
+			if(obj instanceof LShapeLine){
+				((LShapeLine)obj).draw(g);
+			}
+		}
+	}
+
+
+}
+
+class Highlighter extends  JPanel {
+
+	public Highlighter() {
+		setOpaque(false);
+		setBounds(0,0, 500, 500);
+		setBorder(BorderFactory.createLineBorder(Color.white, 5));
+	}
+
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		//g.drawString("Yo man Transparent panel and draw", 100, 100);
+		g.setColor(new Color(75, 248, 7, 100));
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setStroke(new BasicStroke(20));
+		g.drawLine(100, 150, 300, 150);
+		g2.dispose();
 	}
 }

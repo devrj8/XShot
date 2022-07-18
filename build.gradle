@@ -12,6 +12,11 @@ sourceSets {
     }
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
 // Dependencies for the project are stored in the libs directory
 dependencies {
     // compile fileTree(dir: "libs", includes: ["*.jar"])
@@ -19,4 +24,6 @@ dependencies {
 
     // Using this because the resources are in source code
     // runtime fileTree(dir: "${projectDir}/src/main/java/", includes: ["*"])
+
+    implementation("com.jidesoft:jide-oss:3.6.18")
 }

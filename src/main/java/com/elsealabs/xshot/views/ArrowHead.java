@@ -14,6 +14,9 @@ public class ArrowHead {
     public void draw(Graphics g){
         int arrowSize = 7;
 
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setStroke(new BasicStroke(2.0f));
+
         if(arrowDirection == LineDirection.TOP_TO_BOTTOM) {
             g.drawLine(arrowStartPoint.x - arrowSize, arrowStartPoint.y + arrowSize, arrowStartPoint.x, arrowStartPoint.y);
             g.drawLine(arrowStartPoint.x, arrowStartPoint.y, arrowStartPoint.x + arrowSize + 1, arrowStartPoint.y + arrowSize + 1);

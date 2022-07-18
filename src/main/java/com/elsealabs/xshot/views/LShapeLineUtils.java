@@ -9,6 +9,8 @@ public class LShapeLineUtils {
 
     public static void drawLine(Line2D line, Graphics g){
 
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setStroke(new BasicStroke(2));
         g.drawLine((int) line.getX1(), (int) line.getY1(), (int) line.getX2(), (int) line.getY2());
     }
 
